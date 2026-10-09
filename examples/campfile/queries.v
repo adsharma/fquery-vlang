@@ -10,7 +10,7 @@
 //   .edge("n", JoinOn(a, b))   -> .edge(fquery.edge_to[Leaf, Target]('n', fquery.join_on(a, b)))
 //   .take(n)/.project([...])   -> same
 //   .bind(**({...: ...}))      -> .bind({'...': ...})  (ints wrap into Pval)
-//   .rows()                    -> .rows_on(db)! / .rows()!
+//   .rows()                    -> .to_rows(db)! / .rows()!
 module campfile
 
 import db.sqlite
@@ -51,7 +51,7 @@ pub fn is_member(db &sqlite.DB, room_id int, user_id int) bool {
 	]).bind({
 		'rid': room_id
 		'uid': user_id
-	}).rows_on(db) or { return false }
+	}).to_rows(db) or { return false }
 	return rows.len > 0
 }
 
@@ -64,7 +64,7 @@ pub fn users_by_id(db &sqlite.DB, ids []int) map[int]string {
 	rows := new_user_query().where(fquery.pred('user.id in [${int_list(ids)}]')).project([
 		'user.id',
 		'user.name',
-	]).rows_on(db) or { return out }
+	]).to_rows(db) or { return out }
 	for r in rows {
 		out[r['id'].int()] = r['name']
 	}
@@ -83,7 +83,7 @@ pub fn boosts_by_message(db &sqlite.DB, ids []int) map[int][]string {
 	rows := new_boost_query().where(fquery.pred('boost.message_id in [${int_list(ids)}]')).project([
 		'boost.message_id',
 		'boost.content',
-	]).rows_on(db) or { return out }
+	]).to_rows(db) or { return out }
 	for r in rows {
 		mid := r['message_id'].int()
 		if mid in out {
@@ -106,7 +106,7 @@ pub fn mentions_by_message(db &sqlite.DB, ids []int) map[int][]string {
 		fquery.join_on('user_id', 'id'))).where(fquery.pred('mm.message_id in [${int_list(ids)}]')).project([
 		'mm.message_id',
 		'user.name',
-	]).rows_on(db) or { return out }
+	]).to_rows(db) or { return out }
 	for r in rows {
 		mid := r['message_id'].int()
 		if mid in out && r['name'] != '' {
@@ -127,7 +127,7 @@ pub fn bodies_by_message(db &sqlite.DB, ids []int) map[int]string {
 		'rich.body',
 	]).bind({
 		'n': 'body'
-	}).rows_on(db) or { return out }
+	}).to_rows(db) or { return out }
 	for r in rows {
 		out[r['record_id'].int()] = r['body']
 	}
@@ -155,7 +155,7 @@ pub fn sidebar(db &sqlite.DB, user_id int) ![]SidebarEntry {
 	]).bind({
 		'uid': user_id
 		'inv': 'invisible'
-	}).rows_on(db)!
+	}).to_rows(db)!
 	mut out := []SidebarEntry{cap: rows.len}
 	for r in rows {
 		// unread_at arrives as '' (NULL), '0', or ISO text.
@@ -175,14 +175,14 @@ pub fn sidebar(db &sqlite.DB, user_id int) ![]SidebarEntry {
 pub fn room_messages(db &sqlite.DB, room_id int) ![]fquery.Row {
 	return new_message_query().where(fquery.pred('message.room_id == param("rid")')).order_by(fquery.order('desc(message.created_at), desc(message.id)')).take(page_size).project(msg_cols).bind({
 		'rid': room_id
-	}).rows_on(db)!
+	}).to_rows(db)!
 }
 
 // message_count mirrors the has_more count in queries.room_page.
 pub fn message_count(db &sqlite.DB, room_id int) !int {
 	rows := new_message_query().where(fquery.pred('message.room_id == param("rid")')).count().bind({
 		'rid': room_id
-	}).rows_on(db)!
+	}).to_rows(db)!
 	return fquery.count_value(rows)
 }
 
@@ -199,7 +199,7 @@ pub fn user_by_email(db &sqlite.DB, email string) ![]fquery.Row {
 		'user.bio',
 	]).bind({
 		'email': email
-	}).rows_on(db)!
+	}).to_rows(db)!
 }
 
 // user_from_token mirrors queries.user_from_token (session row lookup;
@@ -211,7 +211,7 @@ pub fn session_by_token(db &sqlite.DB, token string) ![]fquery.Row {
 		'sess.last_active_at',
 	]).bind({
 		'tok': token
-	}).rows_on(db)!
+	}).to_rows(db)!
 }
 
 // fts_search mirrors the FTS branch of queries.search_page.
@@ -225,5 +225,5 @@ pub fn fts_search(db &sqlite.DB, room_ids []int, q string, limit int) ![]fquery.
 		'message.created_at',
 	]).bind({
 		'q': q
-	}).rows_on(db)!
+	}).to_rows(db)!
 }

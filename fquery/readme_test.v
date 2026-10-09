@@ -37,7 +37,7 @@ fn test_readme_example() {
 	]).bind({
 		'n': 16
 	})
-	sql_rows := q.rows_on(&db)!
+	sql_rows := q.to_rows(&db)!
 	assert sql_rows.len == 2
 	j := new_query[ReadmeUser]().edge(edge_to[ReadmeUser, ReadmeReview]('reviews',
 		join_on('id', 'author_id'))).where(pred('review.rating > param("r")')).project([
@@ -46,7 +46,7 @@ fn test_readme_example() {
 	]).bind({
 		'r': 4
 	})
-	sql_joined := j.rows_on(&db)!
+	sql_joined := j.to_rows(&db)!
 	assert sql_joined.len == 1
 	assert sql_joined[0]['business'] == 'cafe'
 	user_rows := rows_of(db.exec('select * from users')!)

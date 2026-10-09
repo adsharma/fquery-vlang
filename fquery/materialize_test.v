@@ -164,14 +164,14 @@ fn test_member_agrees_with_sql() {
 		'rid': 3
 		'uid': 7
 	})
-	assert rows_equal(q.to_dicts(leaf, {})!, q.rows_on(&db)!)
+	assert rows_equal(q.to_dicts(leaf, {})!, q.to_rows(&db)!)
 	nope := new_query[MMembership]().where(pred('membership.room_id == param("rid") and membership.user_id == param("uid")')).take(1).project([
 		'membership.id',
 	]).bind({
 		'rid': 4
 		'uid': 8
 	})
-	assert rows_equal(nope.to_dicts(leaf, {})!, nope.rows_on(&db)!)
+	assert rows_equal(nope.to_dicts(leaf, {})!, nope.to_rows(&db)!)
 }
 
 fn test_sidebar_agrees_with_sql() {
@@ -191,7 +191,7 @@ fn test_sidebar_agrees_with_sql() {
 		'uid': 7
 		'inv': 'invisible'
 	})
-	sql_rows := q.rows_on(&db)!
+	sql_rows := q.to_rows(&db)!
 	mem_rows := q.to_dicts(leaf, tables)!
 	assert rows_equal(mem_rows, sql_rows)
 	assert mem_rows.len == 2
@@ -209,7 +209,7 @@ fn test_mention_edge_where_after_join() {
 		'mm.message_id',
 		'user.name',
 	])
-	assert rows_equal(q.to_dicts(leaf, tables)!, q.rows_on(&db)!)
+	assert rows_equal(q.to_dicts(leaf, tables)!, q.to_rows(&db)!)
 }
 
 fn test_rich_bodies_agree_with_sql() {
@@ -221,7 +221,7 @@ fn test_rich_bodies_agree_with_sql() {
 	]).bind({
 		'n': 'body'
 	})
-	assert rows_equal(q.to_dicts(leaf, {})!, q.rows_on(&db)!)
+	assert rows_equal(q.to_dicts(leaf, {})!, q.to_rows(&db)!)
 }
 
 fn test_count_agrees_with_sql() {
@@ -230,7 +230,7 @@ fn test_count_agrees_with_sql() {
 	q := new_query[MMessage]().where(pred('message.room_id == param("rid")')).count().bind({
 		'rid': 3
 	})
-	assert rows_equal(q.to_dicts(leaf, {})!, q.rows_on(&db)!)
+	assert rows_equal(q.to_dicts(leaf, {})!, q.to_rows(&db)!)
 	assert count_value(q.to_dicts(leaf, {})!) == 2
 }
 
@@ -242,7 +242,7 @@ fn test_desc_page_agrees_with_sql() {
 	]).bind({
 		'rid': 3
 	})
-	sql_rows := q.rows_on(&db)!
+	sql_rows := q.to_rows(&db)!
 	mem_rows := q.to_dicts(leaf, {})!
 	assert rows_equal(mem_rows, sql_rows)
 	assert mem_rows[0]['id'] == '12'
@@ -277,7 +277,7 @@ fn test_like_agrees_with_sql() {
 	]).bind({
 		'q': '%e%'
 	})
-	assert rows_equal(q.to_dicts(leaf, {})!, q.rows_on(&db)!)
+	assert rows_equal(q.to_dicts(leaf, {})!, q.to_rows(&db)!)
 }
 
 fn test_match_is_substring() {

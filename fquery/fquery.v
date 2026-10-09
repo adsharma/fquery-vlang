@@ -14,7 +14,7 @@
 //   q := new_query[Membership]()
 //   rows := q.where(pred('membership.room_id == param("rid")')).
 //       take(1).project(['membership.id']).
-//       bind({'rid': rid})!.rows_on(&db)!
+//       bind({'rid': rid})!.to_rows(&db)!
 //
 // Every literal becomes a `?` placeholder; bound params travel separately.
 // Builder methods never fail: the first error sticks and surfaces from the
@@ -623,8 +623,8 @@ pub fn (q Query[T]) to_sql_string() !string {
 	return q.to_sql()!.statement
 }
 
-// rows_on runs the chain on an explicit connection.
-pub fn (q Query[T]) rows_on(db &sqlite.DB) ![]Row {
+// to_rows runs the chain on an explicit connection.
+pub fn (q Query[T]) to_rows(db &sqlite.DB) ![]Row {
 	built := q.to_sql()!
 	return rows_of(db.exec_param_many(built.statement, built.params)!)
 }
@@ -633,12 +633,12 @@ pub fn (q Query[T]) rows_on(db &sqlite.DB) ![]Row {
 // point (or per test), then chains read naturally as bind(...).rows().
 // rows runs the chain on the ambient connection (see use_db).
 pub fn (q Query[T]) rows() ![]Row {
-	return q.rows_on(ambient_db()!)
+	return q.to_rows(ambient_db()!)
 }
 
 // rows_as_on runs the chain and decodes each row into the leaf type T.
 pub fn (q Query[T]) rows_as_on[T](db &sqlite.DB) ![]T {
-	return decode_all[T](q.rows_on(db)!)
+	return decode_all[T](q.to_rows(db)!)
 }
 
 // rows_as runs on the ambient connection and decodes into the leaf type.

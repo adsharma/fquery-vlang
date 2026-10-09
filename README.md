@@ -58,7 +58,7 @@ q := fquery.new_query[User]().
 	order_by(fquery.order('user.name')).take(3).
 	project(['user.id', 'user.name']).
 	bind({'n': 16})
-sql_rows := q.rows_on(&db)!
+sql_rows := q.to_rows(&db)!
 
 // Joins go through declared edges: edge_to binds leaf + target types and
 // validates the name against the @[edge] stubs at compile time.
@@ -67,7 +67,7 @@ j := fquery.new_query[User]().
 	where(fquery.pred('review.rating > param("r")')).
 	project(['user.name', 'review.business']).
 	bind({'r': 4})
-sql_joined := j.rows_on(&db)!
+sql_joined := j.to_rows(&db)!
 
 // Same chains run in memory: fold over rows instead of rendering SQL.
 mem_rows := q.to_dicts(user_rows, {})!

@@ -6,7 +6,7 @@
 // edge name (parent["room"] = [...]) because ViewModels can hold trees;
 // V Rows are flat string maps, and the campfire app consumes flat SQL join
 // rows, so OpEdge is a hash join on the JoinOn keys returning wide rows —
-// row-for-row identical to what to_sql()/rows_on() returns for the same
+// row-for-row identical to what to_sql()/to_rows() returns for the same
 // chain. Cross-backend agreement is asserted in materialize_test.v.
 //
 // Conventions (documented deviations from sqlite/Python where they differ):
@@ -25,7 +25,7 @@ module fquery
 
 import db.sqlite
 
-// rows_of converts raw sqlite rows to Rows (bare column keys). rows_on is
+// rows_of converts raw sqlite rows to Rows (bare column keys). to_rows is
 // built on it; feed its output back in as materialize() input to compare
 // backends on the same data.
 pub fn rows_of(srows []sqlite.Row) []Row {
@@ -362,7 +362,7 @@ fn stable_sort(mut arr []Row, keys []OrderKey) {
 
 // to_dicts runs the chain over in-memory rows: leaf is the leaf-alias
 // row set, tables maps edge-target aliases to their row sets. Returns flat
-// dict rows under the same bare keys as rows_on().
+// dict rows under the same bare keys as to_rows().
 pub fn (q Query[T]) to_dicts(leaf []Row, tables map[string][]Row) ![]Row {
 	if q.build_err != '' {
 		return error(q.build_err)

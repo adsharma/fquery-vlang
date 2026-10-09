@@ -296,7 +296,7 @@ fn test_member_true_and_false() {
 	]).bind({
 		'rid': 3
 		'uid': 7
-	}).rows_on(&db)!
+	}).to_rows(&db)!
 	assert yes.len == 1
 	assert yes[0]['id'] == '1'
 	no := new_query[TMembership]().where(pred('membership.room_id == param("rid") and membership.user_id == param("uid")')).take(1).project([
@@ -304,7 +304,7 @@ fn test_member_true_and_false() {
 	]).bind({
 		'rid': 4
 		'uid': 8
-	}).rows_on(&db)!
+	}).to_rows(&db)!
 	assert no.len == 0
 }
 
@@ -320,7 +320,7 @@ fn test_sidebar_round_trip() {
 	]).bind({
 		'uid': 7
 		'inv': 'invisible'
-	}).rows_on(&db)!
+	}).to_rows(&db)!
 	assert rows.len == 2
 	assert rows[0]['name'] == 'Eng'
 	assert rows[1]['name'] == 'Zebra'
@@ -331,7 +331,7 @@ fn test_count_round_trip() {
 	mut db := seed_db()!
 	rows := new_query[TMessage]().where(pred('message.room_id == param("rid")')).count().bind({
 		'rid': 3
-	}).rows_on(&db)!
+	}).to_rows(&db)!
 	assert count_value(rows) == 2
 }
 
