@@ -343,7 +343,7 @@ fn test_typed_decode() {
 		'user.email_address',
 	]).bind({
 		'id': 7
-	}).rows_as_on(&db)!
+	}).to_structs(&db)!
 	assert got.len == 1
 	assert got[0].id == 7
 	assert got[0].name == 'amy'
@@ -432,7 +432,7 @@ fn test_typed_decode_second_type() {
 		'room.type',
 	]).bind({
 		'id': 3
-	}).rows_as_on(&db)!
+	}).to_structs(&db)!
 	assert got.len == 1
 	assert got[0].id == 3
 	assert got[0].name == 'Eng'

@@ -75,7 +75,7 @@ mem_joined := j.to_dicts(user_rows, {'review': review_rows})!
 ```
 
 `rows()` uses an ambient connection (`use_db(db)` once, mirroring
-`fquery.env`); `rows_as_on()` decodes straight into structs; `dump()`
+`fquery.env`); `to_structs()` decodes straight into structs; `dump()`
 prints the chain for debugging.
 
 ## Lazy materialization and query languages

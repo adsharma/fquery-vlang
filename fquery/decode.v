@@ -5,7 +5,7 @@
 //
 // Two shapes (V 0.5.2 only allows type params mentioned in a pub fn's
 // args/return, so cross-type decode is a free function over rows):
-//   users := new_user_query()...rows_as_on(&db)!   // leaf type == row type
+//   users := new_user_query()...to_structs(&db)!      // leaf type == row type
 //   entries := decode_all[Entry](rows)              // any row type
 module fquery
 

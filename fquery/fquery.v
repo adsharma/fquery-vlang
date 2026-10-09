@@ -636,14 +636,10 @@ pub fn (q Query[T]) rows() ![]Row {
 	return q.to_rows(ambient_db()!)
 }
 
-// rows_as_on runs the chain and decodes each row into the leaf type T.
-pub fn (q Query[T]) rows_as_on[T](db &sqlite.DB) ![]T {
-	return decode_all[T](q.to_rows(db)!)
-}
-
-// rows_as runs on the ambient connection and decodes into the leaf type.
+// to_structs runs the chain and decodes each row into the leaf type T.
 // (Generic methods with an explicit [...] list must live in the same file
-// as their struct in V 0.5.2, hence these live here and not in decode.v.)
-pub fn (q Query[T]) rows_as[T]() ![]T {
-	return decode_all[T](q.rows()!)
+// as their struct in V 0.5.2, hence this lives here and not in decode.v.
+// For the ambient connection, use decode_all[T](q.rows()!).)
+pub fn (q Query[T]) to_structs[T](db &sqlite.DB) ![]T {
+	return decode_all[T](q.to_rows(db)!)
 }
