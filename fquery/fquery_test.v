@@ -438,3 +438,17 @@ fn test_typed_decode_second_type() {
 	assert got[0].name == 'Eng'
 	assert got[0].room_type == 'Rooms::Open'
 }
+
+fn test_ambient_structs() {
+	mut db := seed_db()!
+	use_db(db)
+	got := new_query[TUser]().where(pred('user.id == param("id")')).project([
+		'user.id',
+		'user.name',
+	]).bind({
+		'id': 7
+	}).rows_as()!
+	assert got.len == 1
+	assert got[0].id == 7
+	assert got[0].name == 'amy'
+}
