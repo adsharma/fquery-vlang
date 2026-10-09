@@ -35,13 +35,13 @@ Python side. Writes stay on raw SQL; PK lookups stay direct.
 | `fquery/materialize.v` | In-memory backend: `materialize()` fold over `ops` |
 | `fquery/materialize_test.v` | In-memory semantics + SQL/materialize agreement tests |
 | `fquery/fquery_test.v` | SQL-string parity + live round-trips (the transpiler contract) |
-| `campfile/fq.v` | Node structs + constructors (port of `fq.py`) |
-| `campfile/queries.v` | Hot-path reads (port of `queries.py`) |
-| `campfile/campfile_test.v` | End-to-end against a Rails-shaped DB |
+| `examples/campfile/fq.v` | Node structs + constructors (port of `fq.py`) |
+| `examples/campfile/queries.v` | Hot-path reads (port of `queries.py`) |
+| `examples/campfile/campfile_test.v` | End-to-end against a Rails-shaped DB |
 
 ## Declarations: Python → V
 
-| Python (`fq.py`) | V (`campfile/fq.v`) |
+| Python (`fq.py`) | V (`examples/campfile/fq.v`) |
 |---|---|
 | `@node @dataclass class UserNode` | `@[node] struct User` (node types are named for the entity; `@[node]` is required) |
 | `make_query_type(N, "UserQuery", {"TABLE": "users"})` | `@[table: 'users']` on the struct + `new_user_query()` |
@@ -171,7 +171,7 @@ Found by probing; all are load-bearing for emitted code:
 ## Running
 
 ```sh
-v -enable-globals test fquery campfile
+v -enable-globals test fquery examples/campfile
 ```
 
 `fquery_test.v` pins the exact SQL + params for every chain shape used by
