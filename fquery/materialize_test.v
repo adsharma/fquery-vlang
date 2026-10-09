@@ -131,7 +131,7 @@ fn test_mem_filter_take_project() {
 	]).bind({
 		'rid': 3
 		'uid': 7
-	}).materialize(leaf, {})!
+	}).to_dicts(leaf, {})!
 	assert got.len == 1
 	assert got[0]['id'] == '1'
 }
@@ -150,7 +150,7 @@ fn test_mem_in_list() {
 	got := new_query[MUser]().where(pred('user.id in [7]')).project([
 		'user.id',
 		'user.name',
-	]).materialize(leaf, {})!
+	]).to_dicts(leaf, {})!
 	assert got.len == 1
 	assert got[0]['name'] == 'amy'
 }
@@ -164,14 +164,14 @@ fn test_member_agrees_with_sql() {
 		'rid': 3
 		'uid': 7
 	})
-	assert rows_equal(q.materialize(leaf, {})!, q.rows_on(&db)!)
+	assert rows_equal(q.to_dicts(leaf, {})!, q.rows_on(&db)!)
 	nope := new_query[MMembership]().where(pred('membership.room_id == param("rid") and membership.user_id == param("uid")')).take(1).project([
 		'membership.id',
 	]).bind({
 		'rid': 4
 		'uid': 8
 	})
-	assert rows_equal(nope.materialize(leaf, {})!, nope.rows_on(&db)!)
+	assert rows_equal(nope.to_dicts(leaf, {})!, nope.rows_on(&db)!)
 }
 
 fn test_sidebar_agrees_with_sql() {
@@ -192,7 +192,7 @@ fn test_sidebar_agrees_with_sql() {
 		'inv': 'invisible'
 	})
 	sql_rows := q.rows_on(&db)!
-	mem_rows := q.materialize(leaf, tables)!
+	mem_rows := q.to_dicts(leaf, tables)!
 	assert rows_equal(mem_rows, sql_rows)
 	assert mem_rows.len == 2
 	assert mem_rows[0]['name'] == 'Eng'
@@ -209,7 +209,7 @@ fn test_mention_edge_where_after_join() {
 		'mm.message_id',
 		'user.name',
 	])
-	assert rows_equal(q.materialize(leaf, tables)!, q.rows_on(&db)!)
+	assert rows_equal(q.to_dicts(leaf, tables)!, q.rows_on(&db)!)
 }
 
 fn test_rich_bodies_agree_with_sql() {
@@ -221,7 +221,7 @@ fn test_rich_bodies_agree_with_sql() {
 	]).bind({
 		'n': 'body'
 	})
-	assert rows_equal(q.materialize(leaf, {})!, q.rows_on(&db)!)
+	assert rows_equal(q.to_dicts(leaf, {})!, q.rows_on(&db)!)
 }
 
 fn test_count_agrees_with_sql() {
@@ -230,8 +230,8 @@ fn test_count_agrees_with_sql() {
 	q := new_query[MMessage]().where(pred('message.room_id == param("rid")')).count().bind({
 		'rid': 3
 	})
-	assert rows_equal(q.materialize(leaf, {})!, q.rows_on(&db)!)
-	assert count_value(q.materialize(leaf, {})!) == 2
+	assert rows_equal(q.to_dicts(leaf, {})!, q.rows_on(&db)!)
+	assert count_value(q.to_dicts(leaf, {})!) == 2
 }
 
 fn test_desc_page_agrees_with_sql() {
@@ -243,7 +243,7 @@ fn test_desc_page_agrees_with_sql() {
 		'rid': 3
 	})
 	sql_rows := q.rows_on(&db)!
-	mem_rows := q.materialize(leaf, {})!
+	mem_rows := q.to_dicts(leaf, {})!
 	assert rows_equal(mem_rows, sql_rows)
 	assert mem_rows[0]['id'] == '12'
 	assert mem_rows[1]['id'] == '11'
@@ -264,7 +264,7 @@ fn test_like_lower() {
 		'room.id',
 	]).bind({
 		'q': '%eng%'
-	}).materialize(leaf, {})!
+	}).to_dicts(leaf, {})!
 	assert got.len == 1
 	assert got[0]['id'] == '3'
 }
@@ -277,7 +277,7 @@ fn test_like_agrees_with_sql() {
 	]).bind({
 		'q': '%e%'
 	})
-	assert rows_equal(q.materialize(leaf, {})!, q.rows_on(&db)!)
+	assert rows_equal(q.to_dicts(leaf, {})!, q.rows_on(&db)!)
 }
 
 fn test_match_is_substring() {
@@ -295,7 +295,7 @@ fn test_match_is_substring() {
 		'room.id',
 	]).bind({
 		'q': 'FRIDAY'
-	}).materialize(rooms, {})!
+	}).to_dicts(rooms, {})!
 	assert got.len == 1
 	assert got[0]['id'] == '3'
 }
@@ -313,9 +313,9 @@ fn test_skip_take() {
 		}),
 	]
 	q := new_query[MUser]()
-	assert q.skip(1).take(1).project(['user.id']).materialize(leaf, {})![0]['id'] == '2'
-	assert q.skip(9).project(['user.id']).materialize(leaf, {})!.len == 0
-	assert q.take(0).project(['user.id']).materialize(leaf, {})!.len == 0
+	assert q.skip(1).take(1).project(['user.id']).to_dicts(leaf, {})![0]['id'] == '2'
+	assert q.skip(9).project(['user.id']).to_dicts(leaf, {})!.len == 0
+	assert q.take(0).project(['user.id']).to_dicts(leaf, {})!.len == 0
 }
 
 fn test_is_null() {
@@ -329,9 +329,9 @@ fn test_is_null() {
 		}),
 	]
 	q := new_query[MMembership]()
-	assert q.where(pred('membership.unread_at is null')).project(['membership.id']).materialize(leaf,
+	assert q.where(pred('membership.unread_at is null')).project(['membership.id']).to_dicts(leaf,
 		{})!.len == 1
-	assert q.where(pred('membership.unread_at is not null')).project(['membership.id']).materialize(leaf,
+	assert q.where(pred('membership.unread_at is not null')).project(['membership.id']).to_dicts(leaf,
 		{})!.len == 1
 }
 
@@ -351,7 +351,7 @@ fn test_page_window_or() {
 	]).bind({
 		'ts':  '2024-05-01 10:00:00.000000'
 		'mid': 11
-	}).materialize(leaf, {})!
+	}).to_dicts(leaf, {})!
 	assert got.len == 1
 	assert got[0]['id'] == '12'
 }
@@ -363,7 +363,7 @@ fn test_project_as() {
 			'name': 'Eng'
 		}),
 	]
-	got := new_query[MRoom]().project(['room.id AS rid', 'room.name']).materialize(leaf, {})!
+	got := new_query[MRoom]().project(['room.id AS rid', 'room.name']).to_dicts(leaf, {})!
 	assert got[0]['rid'] == '3'
 	assert got[0]['name'] == 'Eng'
 	assert 'id' !in got[0]
@@ -376,7 +376,7 @@ fn test_missing_param_materialize() {
 		}),
 	]
 	q := new_query[MUser]().where(pred('user.id == param("id")')).project(['user.id'])
-	if _ := q.materialize(leaf, {}) {
+	if _ := q.to_dicts(leaf, {}) {
 		assert false, 'expected a missing-param error'
 	} else {
 		assert err.msg().contains('id')
@@ -393,7 +393,7 @@ fn test_missing_edge_table() {
 	q := new_query[MMembership]().edge(edge_to[MMembership, MRoom]('room', join_on('room_id', 'id'))).project([
 		'membership.id',
 	])
-	if _ := q.materialize(leaf, {}) {
+	if _ := q.to_dicts(leaf, {}) {
 		assert false, 'expected a missing-tables error'
 	} else {
 		assert err.msg().contains('room')
@@ -407,7 +407,7 @@ fn test_unknown_column_materialize() {
 		}),
 	]
 	q := new_query[MUser]().where(pred('user.nope == 1')).project(['user.id'])
-	if _ := q.materialize(leaf, {}) {
+	if _ := q.to_dicts(leaf, {}) {
 		assert false, 'expected an unknown-column error'
 	} else {
 		assert err.msg().contains('user.nope')

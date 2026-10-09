@@ -70,8 +70,8 @@ j := fquery.new_query[User]().
 sql_joined := j.rows_on(&db)!
 
 // Same chains run in memory: fold over rows instead of rendering SQL.
-mem_rows := q.materialize(user_rows, {})!
-mem_joined := j.materialize(user_rows, {'review': review_rows})!
+mem_rows := q.to_dicts(user_rows, {})!
+mem_joined := j.to_dicts(user_rows, {'review': review_rows})!
 ```
 
 `rows()` uses an ambient connection (`use_db(db)` once, mirroring

@@ -360,10 +360,10 @@ fn stable_sort(mut arr []Row, keys []OrderKey) {
 	}
 }
 
-// materialize runs the chain over in-memory rows: leaf is the leaf-alias
+// to_dicts runs the chain over in-memory rows: leaf is the leaf-alias
 // row set, tables maps edge-target aliases to their row sets. Returns flat
-// rows under the same bare keys as rows_on().
-pub fn (q Query[T]) materialize(leaf []Row, tables map[string][]Row) ![]Row {
+// dict rows under the same bare keys as rows_on().
+pub fn (q Query[T]) to_dicts(leaf []Row, tables map[string][]Row) ![]Row {
 	if q.build_err != '' {
 		return error(q.build_err)
 	}
@@ -430,7 +430,7 @@ pub fn (q Query[T]) materialize(leaf []Row, tables map[string][]Row) ![]Row {
 			}
 			OpEdge {
 				target := tables[op.target_alias] or {
-					return error('fquery: materialize needs rows for edge target `${op.target_alias}` (pass via tables)')
+					return error('fquery: to_dicts needs rows for edge target `${op.target_alias}` (pass via tables)')
 				}
 				mut joined := []Row{}
 				for l in rows {

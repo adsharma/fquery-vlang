@@ -50,9 +50,9 @@ fn test_readme_example() {
 	assert sql_joined.len == 1
 	assert sql_joined[0]['business'] == 'cafe'
 	user_rows := rows_of(db.exec('select * from users')!)
-	mem_rows := q.materialize(user_rows, {})!
+	mem_rows := q.to_dicts(user_rows, {})!
 	assert mem_rows.len == 2
-	mem_joined := j.materialize(user_rows, {
+	mem_joined := j.to_dicts(user_rows, {
 		'review': rows_of(db.exec('select * from reviews')!)
 	})!
 	assert mem_joined.len == 1
